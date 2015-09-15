@@ -71,7 +71,7 @@ public class Client {
 		    		System.out.println("[Application Master] Bad formated arg " + arg);
 		    }
 		}
-
+  
 		if(jarPath == null)
 		{
 			System.out.println("yarn.jarpath not specified");
@@ -82,6 +82,14 @@ public class Client {
 		
 	    // Create yarnClient
 	    YarnConfiguration conf = new YarnConfiguration();
+	    conf.set("fs.hdfs.impl", 
+            org.apache.hadoop.hdfs.DistributedFileSystem.class.getName()
+        );
+	    
+	    conf.set("fs.file.impl",
+            org.apache.hadoop.fs.LocalFileSystem.class.getName()
+        );
+	        
 	    YarnClient yarnClient = YarnClient.createYarnClient();
 	    yarnClient.init(conf);
 	    yarnClient.start();
@@ -91,6 +99,10 @@ public class Client {
 	    // Create application via yarnClient
 	    YarnClientApplication app = yarnClient.createApplication();
 
+	    command = "date ";
+	    
+	    System.out.println("[Client] Launching AM with command :" + command);
+	    
 	    // Set up the container launch context for the application master
 	    ContainerLaunchContext amContainer = Records.newRecord(ContainerLaunchContext.class);
 	    amContainer.setCommands(
@@ -98,7 +110,7 @@ public class Client {
 						            "$JAVA_HOME/bin/java" +
 						            " -Xmx256M" +
 						            " glasswing.yarn.ApplicationMaster" +
-						            " " + command +
+						        		command + 
 						            " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" + 
 						            " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr" 
 						            )
